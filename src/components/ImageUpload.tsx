@@ -12,7 +12,7 @@ interface ImageUploadProps {
 function ImageUpload({ endpoint, onChange, value }: ImageUploadProps) {
   if (value) {
     return (
-      <div className="relative size-40">
+      <div className="relative  size-40">
         <img src={value} alt="Upload" className="rounded-md size-40 object-cover" />
         <button
           onClick={() => onChange("")}

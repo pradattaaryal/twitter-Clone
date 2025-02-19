@@ -160,3 +160,16 @@ export async function toggleFollow(targetUserId: string) {
     return { success: false, error: "Error toggling follow" };
   }
 }
+export async function getFollowingUsers(userId: string) {
+  try {
+    const following = await prisma.follows.findMany({
+      where: { followerId: userId },
+      include: { following: true },
+    });
+    
+    return following.map((f) => f.following);
+  } catch (error) {
+    console.error('Failed to fetch following list:', error);
+    throw new Error('Failed to fetch following list');
+  }
+}

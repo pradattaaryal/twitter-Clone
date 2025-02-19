@@ -2,6 +2,8 @@ import { getPosts } from "@/actions/post.action";
 import { getDbUserId } from "@/actions/user.action";
 import CreatePost from "@/components/CreatePost";
 import PostCard from "@/components/PostCard";
+import PremiumCard from "@/components/PremiumCard";
+import SearchInput from "@/components/SearchInput";
 import WhoToFollow from "@/components/WhoToFollow";
 import { currentUser } from "@clerk/nextjs/server";
 
@@ -22,8 +24,10 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="hidden lg:block lg:col-span-4 sticky top-20">
-        <WhoToFollow />
+      <div className="hidden gap-4 lg:block lg:col-span-4 sticky top-24">
+        <div className="pb-4"> <SearchInput/></div>
+        <div><PremiumCard /></div>
+      
       </div>
     </div>
   );

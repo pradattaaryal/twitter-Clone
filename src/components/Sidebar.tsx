@@ -1,103 +1,102 @@
-import { currentUser } from "@clerk/nextjs/server";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
-import { Button } from "./ui/button";
-import { getUserByClerkId } from "@/actions/user.action";
 import Link from "next/link";
-import { Avatar, AvatarImage } from "./ui/avatar";
-import { Separator } from "./ui/separator";
-import { LinkIcon, MapPinIcon } from "lucide-react";
+import {
+  Home,
+  Search,
+  Bell,
+  Mail,
+  Bookmark,
+  Users,
+  Crown,
+  Zap,
+  User,
+  MoreHorizontal,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { currentUser } from "@clerk/nextjs/server";
 
-async function Sidebar() {
-  const authUser = await currentUser();
-  if (!authUser) return <UnAuthenticatedSidebar />;
-
-  const user = await getUserByClerkId(authUser.id);
-  if (!user) return null;
+export default async function SidebarNav() {
+  const user = await currentUser();
+  
+  if (!user) return null; // Ensure user is available
 
   return (
-    <div className="sticky top-20">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center text-center">
-            <Link
-              href={`/profile/${user.username}`}
-              className="flex flex-col items-center justify-center"
-            >
-              <Avatar className="w-20 h-20 border-2 ">
-                <AvatarImage src={user.image || "/avatar.png"} />
-              </Avatar>
-
-              <div className="mt-4 space-y-1">
-                <h3 className="font-semibold">{user.name}</h3>
-                <p className="text-sm text-muted-foreground">{user.username}</p>
-              </div>
-            </Link>
-
-            {user.bio && <p className="mt-3 text-sm text-muted-foreground">{user.bio}</p>}
-
-            <div className="w-full">
-              <Separator className="my-4" />
-              <div className="flex justify-between">
-                <div>
-                  <p className="font-medium">{user._count.following}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
-                </div>
-                <Separator orientation="vertical" />
-                <div>
-                  <p className="font-medium">{user._count.followers}</p>
-                  <p className="text-xs text-muted-foreground">Followers</p>
-                </div>
-              </div>
-              <Separator className="my-4" />
+    <div className="sticky top-24 flex flex-col rounded-lg justify-between p-4 bg-black text-white w-[280px]">
+      <div className="space-y-2">
+        {/* Navigation Items */}
+        <nav className="space-y-1">
+          <Link
+            href="/"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Home className="h-7 w-7" />
+            Home
+          </Link>
+          <Link
+            href="/explore"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Search className="h-7 w-7" />
+            Explore
+          </Link>
+          <Link
+            href="/notifications"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <div className="relative">
+              <Bell className="h-7 w-7" />
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs">
+                1
+              </span>
             </div>
+            Notifications
+          </Link>
+          <Link
+            href="/messages"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Mail className="h-7 w-7" />
+            Messages
+          </Link>
+          <Link
+            href="/bookmarks"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Bookmark className="h-7 w-7" />
+            Bookmarks
+          </Link>
+          <Link
+            href="/communities"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Users className="h-7 w-7" />
+            Communities
+          </Link>
+          <Link
+            href="/premium"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Crown className="h-7 w-7" />
+            Premium
+          </Link>
+          <Link
+            href="/verified-orgs"
+            className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900"
+          >
+            <Zap className="h-7 w-7" />
+            Verified Orgs
+          </Link>
+          
+          <button className="flex items-center gap-4 rounded-full px-4 py-3 text-xl hover:bg-gray-900 w-full text-left">
+            <MoreHorizontal className="h-7 w-7" />
+            More
+          </button>
+        </nav>
 
-            <div className="w-full space-y-2 text-sm">
-              <div className="flex items-center text-muted-foreground">
-                <MapPinIcon className="w-4 h-4 mr-2" />
-                {user.location || "No location"}
-              </div>
-              <div className="flex items-center text-muted-foreground">
-                <LinkIcon className="w-4 h-4 mr-2 shrink-0" />
-                {user.website ? (
-                  <a href={`${user.website}`} className="hover:underline truncate" target="_blank">
-                    {user.website}
-                  </a>
-                ) : (
-                  "No website"
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Post Button */}
+        <Button className="w-full rounded-full bg-blue-500 px-4 py-6 text-lg font-bold hover:bg-blue-600 mt-4">
+          Post
+        </Button>
+      </div>
     </div>
   );
 }
-
-export default Sidebar;
-
-const UnAuthenticatedSidebar = () => (
-  <div className="sticky top-20">
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-center text-xl font-semibold">Welcome Back!</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-center text-muted-foreground mb-4">
-          Login to access your profile and connect with others.
-        </p>
-        <SignInButton mode="modal">
-          <Button className="w-full" variant="outline">
-            Login
-          </Button>
-        </SignInButton>
-        <SignUpButton mode="modal">
-          <Button className="w-full mt-2" variant="default">
-            Sign Up
-          </Button>
-        </SignUpButton>
-      </CardContent>
-    </Card>
-  </div>
-);

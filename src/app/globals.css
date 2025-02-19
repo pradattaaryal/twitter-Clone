@@ -11,7 +11,15 @@ body {
     text-wrap: balance;
   }
 }
+ 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
+}
 
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
 @layer base {
   :root {
     --background: 0 0% 100%;
