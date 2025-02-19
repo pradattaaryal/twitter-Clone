@@ -1,35 +1,31 @@
 "use client";
-import { ReactNode, useState, useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import FollowingList from "@/app/messages/FollowingList";
 import ChatBox from "./ChatBox";
+import { getDbUserId } from "@/actions/user.action";
 
-interface FollowingAndChatLayoutProps {
-  children: ReactNode;
-  userId: string;
-}
+export default function Page() {
+  const [userId, setUserId] = useState<string | null>(null);
 
-const FollowingAndChatLayout = ({
-  children,
-  userId,
-}: FollowingAndChatLayoutProps) => {
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getDbUserId();
+      setUserId(id);
+    };
 
-  const openChat = (receiverId: string) => {
-    setSelectedUser(receiverId);
-  };
+    fetchUserId();
+  }, []);
 
   return (
-    <div  className="   flex  gap-10  h-full ">
+    <div className="flex gap-10 h-full">
       <div className="w-full">
-        <ChatBox  userId={userId}  />
+        {userId && <ChatBox userId={userId} />}
       </div>
 
-      <div className="  w-[50%] ">
-        <FollowingList userId={userId} />
+      <div className="w-[50%]">
+        {userId && <FollowingList userId={userId} />}
       </div>
-
-     </div>
+    </div>
   );
-};
-
-export default FollowingAndChatLayout;
+}
