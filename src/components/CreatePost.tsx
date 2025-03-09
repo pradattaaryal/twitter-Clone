@@ -1,34 +1,73 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import { ImageIcon, Loader2Icon, SendIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { createPost } from "@/actions/post.action";
+import { getSignedURL } from "@/actions/urlactions"; // Import the getSignedURL action
 import toast from "react-hot-toast";
- 
+
 function CreatePost() {
   const { user } = useUser();
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
-  const [showImageUpload, setShowImageUpload] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!content.trim() && !imageUrl) return;
-
+    if (!content.trim() && !imageFile) return;
+  
     setIsPosting(true);
     try {
-      const result = await createPost(content, imageUrl);
+      let imageURL = ""; // Default to an empty string if no image is uploaded
+  
+      // Upload image to S3 if an image file is selected
+      if (imageFile) {
+        const signedURLResult = await getSignedURL();
+  
+        if (signedURLResult.failure !== undefined) {
+          console.error(signedURLResult.failure);
+          toast.error("Failed to generate upload URL");
+          return;
+        }
+  
+        if (signedURLResult.success) {
+          const { urlSigned } = signedURLResult.success;
+  
+          // Upload the image file to S3
+          await fetch(urlSigned, {
+            method: "PUT",
+            headers: {
+              "Content-Type": imageFile.type,
+            },
+            body: imageFile,
+          });
+  
+          // Extract the image URL without query parameters
+          imageURL = urlSigned.split("?")[0];
+        }
+      }
+  
+      // Create the post with the content and image URL
+      const result = await createPost(content, imageURL); // imageURL is always a string
+  
       if (result?.success) {
-        // reset the form
         setContent("");
-        setImageUrl("");
-        setShowImageUpload(false);
-
+        setImageFile(null);
+        setImagePreview(null);
         toast.success("Post created successfully");
       }
     } catch (error) {
@@ -39,13 +78,17 @@ function CreatePost() {
     }
   };
 
+  const handleImageButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <Card className="mb-6 ">
+    <Card className="mb-6">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="flex space-x-4">
             <Avatar className="w-10 h-10">
-              <AvatarImage src={user?.imageUrl || "/avatar.png"} />
+              <AvatarImage src={user?.imageUrl || "/avatar.png"} alt="User Avatar" />
             </Avatar>
             <Textarea
               placeholder="What's on your mind?"
@@ -53,21 +96,27 @@ function CreatePost() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               disabled={isPosting}
+              aria-label="Post content"
             />
           </div>
 
-          {/*{(showImageUpload || imageUrl) && (
-            <div className="border bg-purple-600 rounded-lg p-4">
-              <ImageUpload
-                endpoint="postImage"
-                value={imageUrl}
-                onChange={(url) => {
-                  setImageUrl(url);
-                  if (!url) setShowImageUpload(false);
-                }}
-              />
+          <div className="rounded-lg">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={isPosting}
+              aria-label="Upload image"
+              ref={fileInputRef}
+              className="hidden"
+            />
+          </div>
+
+          {imagePreview && (
+            <div className="mt-4">
+              <img src={imagePreview} alt="Post image preview" className="rounded-lg max-w-full h-auto" />
             </div>
-          )}*/}
+          )}
 
           <div className="flex items-center justify-between border-t pt-4">
             <div className="flex space-x-2">
@@ -76,8 +125,9 @@ function CreatePost() {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-primary"
-                onClick={() => setShowImageUpload(!showImageUpload)}
+                onClick={handleImageButtonClick}
                 disabled={isPosting}
+                aria-label="Toggle image upload"
               >
                 <ImageIcon className="size-4 mr-2" />
                 Photo
@@ -86,7 +136,8 @@ function CreatePost() {
             <Button
               className="flex items-center"
               onClick={handleSubmit}
-              disabled={(!content.trim() && !imageUrl) || isPosting}
+              disabled={(!content.trim() && !imageFile) || isPosting}
+              aria-label="Submit post"
             >
               {isPosting ? (
                 <>
@@ -106,4 +157,5 @@ function CreatePost() {
     </Card>
   );
 }
+
 export default CreatePost;
