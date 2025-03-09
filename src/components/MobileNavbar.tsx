@@ -66,6 +66,12 @@ function MobileNavbar() {
                     Profile
                   </Link>
                 </Button>
+                <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
+              <Link href="/messages">
+                <HomeIcon className="w-4 h-4" />
+                messages
+              </Link>
+            </Button>
                 <SignOutButton>
                   <Button variant="ghost" className="flex items-center gap-3 justify-start w-full">
                     <LogOutIcon className="w-4 h-4" />
