@@ -5,7 +5,7 @@ export default function PremiumCard() {
   return (
     <Card className="bg-black text-white border-none max-w-[380px]">
       <CardHeader>
-        <h2 className="text-xl font-bold">Subscribe to Premium</h2>
+        <h2 className="text-xl font-bold">Subscribbbe to Premium</h2>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-gray-300">Subscribe to unlock new features and if eligible, receive a share of revenue.</p>
