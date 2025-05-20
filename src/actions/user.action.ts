@@ -106,6 +106,82 @@ export async function getRandomUsers() {
   }
 }
 
+
+
+export async function searchUsers(query: string) {
+  try {
+    if (!query.trim()) return [];
+    
+    // Get current user ID to exclude from results
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return [];
+    
+    const currentUser = await prisma.user.findUnique({
+      where: { clerkId }
+    });
+    
+    if (!currentUser) return [];
+    
+    // Search for users by name or username - only get avatar and name
+    const users = await prisma.user.findMany({
+      where: {
+        AND: [
+          { NOT: { id: currentUser.id } }, // Exclude current user
+          {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { username: { contains: query, mode: 'insensitive' } }
+            ]
+          }
+        ]
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true, // Still need username for the profile link
+        image: true,    // Avatar image
+      },
+      take: 10,
+    });
+    
+    return users;
+  } catch (error) {
+    console.error("Error searching users:", error);
+    return [];
+  }
+}
+
+
+
+
+
+export async function getUserByName(name: string) {
+  try {
+    if (!name.trim()) return null;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { name: { equals: name, mode: 'insensitive' } },
+          { username: { equals: name, mode: 'insensitive' } }
+        ]
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        image: true,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error fetching user by name:", error);
+    return null;
+  }
+}
+
+
 export async function toggleFollow(targetUserId: string) {
   try {
     const userId = await getDbUserId();

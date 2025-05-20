@@ -24,7 +24,7 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="hidden gap-4 lg:block lg:col-span-4 sticky top-24">
+      <div className="hidden gap-4 xl:block lg:col-span-4 sticky top-24">
         <div className="pb-4"> <SearchInput/></div>
         <div><PremiumCard /></div>
       

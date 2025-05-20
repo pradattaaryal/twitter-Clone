@@ -89,6 +89,36 @@ export async function getUserPosts(userId: string) {
   }
 }
 
+export async function getbyname(usernameSearch: string) {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        username: {
+          contains: usernameSearch,
+          mode: "insensitive"
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        image: true
+      },
+      orderBy: {
+        username: "asc"
+      },
+      take: 10
+    });
+
+    return users; // Array of users
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+    throw new Error("Failed to fetch profiles");
+  }
+}
+
+
+
 export async function getUserLikedPosts(userId: string) {
   try {
     const likedPosts = await prisma.post.findMany({
